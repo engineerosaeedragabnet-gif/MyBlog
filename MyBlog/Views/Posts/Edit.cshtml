@@ -1,0 +1,73 @@
+﻿@model MyBlog.ViewModels.PostFormViewModel
+
+@{
+    ViewData["Title"] = "Edit Post";
+}
+
+<h1>Edit Post</h1>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ExistingImagePath" />
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+            <option value="0">-- Select a category --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tags</label>
+        <div>
+            @foreach (var tag in (List<Tag>)ViewBag.Tags)
+            {
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox"
+                           name="SelectedTagIds" value="@tag.Id" id="tag_@tag.Id"
+                           checked="@Model.SelectedTagIds.Contains(tag.Id)" />
+                    <label class="form-check-label" for="tag_@tag.Id">@tag.Name</label>
+                </div>
+            }
+            @if (!((List<Tag>)ViewBag.Tags).Any())
+            {
+                <span class="text-muted">No tags yet. <a asp-controller="Tags" asp-action="Create">Create one</a>.</span>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Content" class="form-label"></label>
+        <textarea asp-for="Content" class="form-control" rows="8"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ImageFile" class="form-label"></label>
+        @if (!string.IsNullOrEmpty(Model.ExistingImagePath))
+        {
+            <div class="mb-2">
+                <img src="@Model.ExistingImagePath" alt="Current image"
+                     style="max-height:120px; border-radius:8px;" />
+                <div class="form-text">Current image. Upload a new one to replace it.</div>
+            </div>
+        }
+        <input asp-for="ImageFile" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+        <span asp-validation-for="ImageFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

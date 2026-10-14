@@ -1,0 +1,41 @@
+﻿@model IEnumerable<MyBlog.ViewModels.TagListItemViewModel>
+
+@{
+    ViewData["Title"] = "Tags";
+}
+
+<h1>Tags</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Tag Name</th>
+            <th>Posts</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.PostsCount</td>
+                <td>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post"
+                          onsubmit="return confirm('Delete this tag?');" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

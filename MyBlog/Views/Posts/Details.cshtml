@@ -1,0 +1,113 @@
+﻿@model Post
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+@functions {
+    string TimeAgo(DateTime date)
+    {
+        var span = DateTime.Now - date;
+
+        if (span.TotalMinutes < 1) return "just now";
+        if (span.TotalMinutes < 60) return $"{(int)span.TotalMinutes} minute(s) ago";
+        if (span.TotalHours < 24) return $"{(int)span.TotalHours} hour(s) ago";
+        if (span.TotalDays < 30) return $"{(int)span.TotalDays} day(s) ago";
+        return date.ToString("yyyy/MM/dd");
+    }
+}
+
+<article>
+    <h1>@Model.Title</h1>
+
+    <p class="text-muted">
+        <span class="badge bg-secondary">@Model.Category.Name</span>
+        · @Model.CreatedAt.ToString("yyyy/MM/dd HH:mm")
+    </p>
+
+    @if (!string.IsNullOrEmpty(Model.ImagePath))
+    {
+        <img src="@Model.ImagePath" alt="@Model.Title" class="img-fluid rounded mb-4" />
+    }
+
+    <div style="white-space: pre-line;">@Model.Content</div>
+</article>
+
+@if (Model.Tags.Any())
+{
+    <p>
+        @foreach (var tag in Model.Tags)
+        {
+            <a asp-action="Index" asp-route-tagId="@tag.Id"
+               class="badge bg-light text-dark border text-decoration-none">#@tag.Name</a>
+        }
+    </p>
+}
+
+<hr />
+
+<section id="comments">
+    <h4>Comments (@Model.Comments.Count)</h4>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @if (!Model.Comments.Any())
+    {
+        <p class="text-muted">No comments yet. Be the first to comment!</p>
+    }
+
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="card mb-2">
+            <div class="card-body py-2 d-flex justify-content-between align-items-start">
+                <div>
+                    <strong>@comment.AuthorName</strong>
+                    <small class="text-muted"> · @TimeAgo(comment.CreatedAt)</small>
+                    <p class="mb-0" style="white-space: pre-line;">@comment.Text</p>
+                </div>
+
+                <form asp-controller="Comments" asp-action="Delete" asp-route-id="@comment.Id" method="post"
+                      onsubmit="return confirm('Delete this comment?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    }
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Leave a comment</h5>
+
+            <form asp-controller="Comments" asp-action="Create" method="post">
+                <input type="hidden" name="PostId" value="@Model.Id" />
+
+                <div class="mb-3">
+                    <label for="AuthorName" class="form-label">Name</label>
+                    <input id="AuthorName" name="AuthorName" class="form-control"
+                           required maxlength="50" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="Text" class="form-label">Comment</label>
+                    <textarea id="Text" name="Text" class="form-control" rows="4"
+                              required maxlength="1000"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<div class="mt-4">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to Posts</a>
+</div>
